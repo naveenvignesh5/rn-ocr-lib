@@ -20,3 +20,7 @@ const RnOcrLib = NativeModules.RnOcrLib
 export function multiply(a: number, b: number): Promise<number> {
   return RnOcrLib.multiply(a, b);
 }
+
+export function ocr(data: string): Promise<string> {
+  return RnOcrLib.ocr(data);
+}
