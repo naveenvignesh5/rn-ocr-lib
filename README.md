@@ -11,11 +11,11 @@ npm install rn-ocr-lib
 ## Usage
 
 ```js
-import { multiply } from 'rn-ocr-lib';
+import { ocr } from 'rn-ocr-lib';
 
-// ...
+// pass base64 string data:image/png;base64,iVBORw0... without data part
 
-const result = await multiply(3, 7);
+const result = await ocr('iVBORw0...');
 ```
 
 ## Contributing
