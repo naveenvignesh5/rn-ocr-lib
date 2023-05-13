@@ -45,14 +45,14 @@ public class RnOcrLibModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void getText(String data, String ocrInputType, Promise promise) {
+  public void getText(String data, String ocrInputType, int pageSegMode, Promise promise) {
     if (data.isEmpty()) {
       promise.reject(ocrInputType + " data is empty");
       return;
     }
 
     try {
-      ocrUtil.getText(data, ocrInputType);
+      ocrUtil.getText(data, ocrInputType, pageSegMode);
       promise.resolve("");
     } catch (Exception e) {
       promise.reject(e.getMessage());

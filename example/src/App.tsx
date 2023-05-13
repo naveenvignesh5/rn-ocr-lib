@@ -33,12 +33,17 @@ export default function App() {
   };
 
   useEffect(() => {
-    const eventListener = eventEmitter.addListener('finished', (event) => {
+    eventEmitter.addListener('finished', (event) => {
       setText(event.text);
     });
 
+    eventEmitter.addListener('progress', (event) => {
+      console.log('percent', event.percent);
+    });
+
     return () => {
-      eventListener.remove();
+      eventEmitter.removeAllListeners('finished');
+      eventEmitter.removeAllListeners('progress');
     };
   }, []);
 

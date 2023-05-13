@@ -1,4 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
+import { DataInputType, OCROptions, PageSetMode } from './types';
 
 const LINKING_ERROR =
   `The package 'rn-ocr-lib' doesn't seem to be linked. Make sure: \n\n` +
@@ -17,12 +18,17 @@ const RnOcrLib = NativeModules.RnOcrLib
       }
     );
 
-export enum DataInputType {
-  file = 'FILE',
-  base64 = 'BASE64',
-}
+const defaultOptions: Partial<OCROptions> = {
+  pageSetMode: PageSetMode.PSM_SINGLE_BLOCK,
+};
 
 export const getText = (
   data: string,
-  inputType: DataInputType
-): Promise<void> => RnOcrLib.getText(data, inputType);
+  inputType: DataInputType,
+  options?: OCROptions
+): void => {
+  const { pageSetMode } = options || defaultOptions;
+  RnOcrLib.getText(data, inputType, pageSetMode);
+};
+
+export { DataInputType, OCROptions, PageSetMode };

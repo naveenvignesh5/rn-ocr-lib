@@ -4,6 +4,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -12,6 +13,9 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
+import com.googlecode.tesseract.android.TessBaseAPI.ProgressNotifier;
+import com.googlecode.tesseract.android.TessBaseAPI.ProgressValues;
+import com.googlecode.tesseract.android.TessBaseAPI.PageSegMode;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,25 +25,43 @@ import java.io.OutputStream;
 
 public class OCRUtil {
     // tesseract base api instances for mrz and english train data models
-    private TessBaseAPI baseApi;
-    private int pageMode = TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
     private ReactApplicationContext context;
+
+    private TessBaseAPI baseApi;
+    private int pageMode = PageSegMode.PSM_SINGLE_BLOCK;
 
     // override constructor with context as argument
     public OCRUtil(ReactApplicationContext ctx) throws IOException {
-        this.context = ctx;
+        context = ctx;
 
         // extract files to local storage to have it readable for tesseract api
-        extractTrainData(this.context);
+        extractTrainData(context);
 
-        // initialize apis for english and mrz text
-        baseApi = new TessBaseAPI();
+        initTessBaseApi();
+        initTessLangModel();
+    }
 
-        // set page mode for block text recognization
+    private void initTessBaseApi() {
+        baseApi = new TessBaseAPI(new ProgressNotifier() {
+            @Override
+            public void onProgressValues(ProgressValues progressValues) {
+                int percent = progressValues.getPercent();
+
+                Log.d("OCRUtil", String.valueOf(percent));
+
+                WritableMap params = Arguments.createMap();
+                params.putInt("percent", percent);
+
+                sendEvent(context, "progress", params);
+            }
+        });
+
         baseApi.setPageSegMode(pageMode);
+    }
 
+    private void initTessLangModel() {
         // get traindata path from local storage
-        String dataPath = ctx.getFilesDir().getPath();
+        String dataPath = context.getFilesDir().getPath();
 
         // create file instance from traindata folder
         File f = new File(dataPath);
@@ -50,25 +72,24 @@ public class OCRUtil {
         }
     }
 
-    public void setPageSegMode(int pageMode) {
-        this.pageMode = pageMode;
-    }
-
     // call tesseract api and recognize english text from bitmap image
-    public void getText(String data, String ocrInputType) throws IOException {
+    public void getText(String data, String ocrInputType, int pageSegMode) throws IOException {
         new Thread(() -> {
+            baseApi.setPageSegMode(pageSegMode);
+
             if (ocrInputType.equals("BASE64")) {
                 baseApi.setImage(ImageUtil.base64ToBitmap(data));
             } else {
                 baseApi.setImage(new File(data));
             }
 
+            baseApi.getHOCRText(0);
             String text = baseApi.getUTF8Text();
 
             WritableMap params = Arguments.createMap();
             params.putString("text", text);
 
-            sendEvent(this.context, "finished", params);
+            sendEvent(context, "finished", params);
         }).start();
     }
 
