@@ -1,10 +1,15 @@
 package com.rnocrlib;
 
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import androidx.annotation.Nullable;
+
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 
@@ -18,11 +23,14 @@ public class OCRUtil {
     // tesseract base api instances for mrz and english train data models
     private TessBaseAPI baseApi;
     private int pageMode = TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
+    private ReactApplicationContext context;
 
     // override constructor with context as argument
-    public OCRUtil(Context ctx) throws IOException {
+    public OCRUtil(ReactApplicationContext ctx) throws IOException {
+        this.context = ctx;
+
         // extract files to local storage to have it readable for tesseract api
-        extractTrainData(ctx);
+        extractTrainData(this.context);
 
         // initialize apis for english and mrz text
         baseApi = new TessBaseAPI();
@@ -47,15 +55,21 @@ public class OCRUtil {
     }
 
     // call tesseract api and recognize english text from bitmap image
-    public String getText(Bitmap image) {
-        // set image to tesseract api instance for mrz
-        baseApi.setImage(image);
+    public void getText(String data, String ocrInputType) throws IOException {
+        new Thread(() -> {
+            if (ocrInputType.equals("BASE64")) {
+                baseApi.setImage(ImageUtil.base64ToBitmap(data));
+            } else {
+                baseApi.setImage(new File(data));
+            }
 
-        // get text
-        String text = baseApi.getUTF8Text();
+            String text = baseApi.getUTF8Text();
 
-        // return the result
-        return text;
+            WritableMap params = Arguments.createMap();
+            params.putString("text", text);
+
+            sendEvent(this.context, "finished", params);
+        }).start();
     }
 
     // copy file from src to dest
@@ -74,7 +88,7 @@ public class OCRUtil {
     }
 
     // extract train data from assets to cache folder
-    private void extractTrainData(Context ctx) throws IOException {
+    private void extractTrainData(ReactApplicationContext ctx) throws IOException {
         // asset manager instance
         AssetManager assetManager = ctx.getAssets();
 
@@ -82,7 +96,7 @@ public class OCRUtil {
         String[] files = assetManager.list("tessdata");
 
         // data path where traindata files will be copied
-        String dataPath = ctx.getFilesDir().getPath() + File.separator + "tessdata/";
+        String dataPath = context.getApplicationContext().getFilesDir().getPath() + File.separator + "tessdata/";
 
         // instances for input and output stream
         InputStream inputStream;
@@ -123,9 +137,12 @@ public class OCRUtil {
         }
     }
 
-    public Bitmap base64ToBitmap(String encodedImage) {
-        byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        return decodedByte;
+    private void sendEvent(
+            ReactApplicationContext reactContext,
+            String eventName,
+            @Nullable WritableMap params) {
+        reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
     }
 }

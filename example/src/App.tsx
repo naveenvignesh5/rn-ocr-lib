@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   StyleSheet,
@@ -6,14 +6,18 @@ import {
   Button,
   useWindowDimensions,
   Text,
+  NativeEventEmitter,
+  NativeModules,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import RNFetchBlob from 'rn-fetch-blob';
 
-import { ocr } from 'rn-ocr-lib';
+import { getText, DataInputType } from 'rn-ocr-lib';
 
 const IMAGE_URL: string =
   'https://chillyfacts.com/wp-content/uploads/2018/11/ocr-sample2.png';
+
+const eventEmitter = new NativeEventEmitter(NativeModules.RnOcrLib);
 
 export default function App() {
   const { width } = useWindowDimensions();
@@ -24,10 +28,19 @@ export default function App() {
     try {
       const fetchRes = await RNFetchBlob.fetch('GET', IMAGE_URL);
       const base64 = fetchRes.base64();
-      const res = await ocr(base64);
-      setText(res);
+      getText(base64, DataInputType.base64);
     } catch (err) {}
   };
+
+  useEffect(() => {
+    const eventListener = eventEmitter.addListener('finished', (event) => {
+      setText(event.text);
+    });
+
+    return () => {
+      eventListener.remove();
+    };
+  }, []);
 
   return (
     <View style={styles.container}>

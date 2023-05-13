@@ -24,7 +24,7 @@ public class RnOcrLibModule extends ReactContextBaseJavaModule {
   public RnOcrLibModule(ReactApplicationContext reactContext) {
     super(reactContext);
     try {
-      ocrUtil = new OCRUtil(reactContext.getApplicationContext());
+      ocrUtil = new OCRUtil(reactContext);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -36,23 +36,24 @@ public class RnOcrLibModule extends ReactContextBaseJavaModule {
     return NAME;
   }
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
   @ReactMethod
-  public void multiply(double a, double b, Promise promise) {
-    promise.resolve(a * b);
+  public void addListener(String eventName) {
   }
 
   @ReactMethod
-  public void ocr(String base64String, Promise promise) {
-    if (base64String.isEmpty()) {
-      promise.reject("base64 data is empty");
+  public void removeListeners(Integer count) {
+  }
+
+  @ReactMethod
+  public void getText(String data, String ocrInputType, Promise promise) {
+    if (data.isEmpty()) {
+      promise.reject(ocrInputType + " data is empty");
       return;
     }
 
     try {
-      String ocrText = ocrUtil.getText(ocrUtil.base64ToBitmap(base64String));
-      promise.resolve(ocrText);
+      ocrUtil.getText(data, ocrInputType);
+      promise.resolve("");
     } catch (Exception e) {
       promise.reject(e.getMessage());
     }

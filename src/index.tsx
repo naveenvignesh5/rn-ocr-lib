@@ -17,10 +17,12 @@ const RnOcrLib = NativeModules.RnOcrLib
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return RnOcrLib.multiply(a, b);
+export enum DataInputType {
+  file = 'FILE',
+  base64 = 'BASE64',
 }
 
-export function ocr(data: string): Promise<string> {
-  return RnOcrLib.ocr(data);
-}
+export const getText = (
+  data: string,
+  inputType: DataInputType
+): Promise<void> => RnOcrLib.getText(data, inputType);
