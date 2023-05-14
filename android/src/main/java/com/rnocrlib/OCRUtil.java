@@ -4,7 +4,6 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
-import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -46,8 +45,6 @@ public class OCRUtil {
             @Override
             public void onProgressValues(ProgressValues progressValues) {
                 int percent = progressValues.getPercent();
-
-                Log.d("OCRUtil", String.valueOf(percent));
 
                 WritableMap params = Arguments.createMap();
                 params.putInt("percent", percent);
