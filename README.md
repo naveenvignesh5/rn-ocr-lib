@@ -2,11 +2,6 @@
 
 React native library to perform OCR on images.
 
-**Note:**
-
-- For now only available for Android
-- iOS version is being built
-
 ## Installation
 
 ```sh
