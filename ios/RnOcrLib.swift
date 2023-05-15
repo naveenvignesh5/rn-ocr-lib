@@ -17,13 +17,11 @@ class RnOcrLib: RCTEventEmitter {
 
   @objc(getText:withOcrInputType:withOcrOptions:withResolver:withRejecter:)
   func getText(data: String, ocrInputType: String, ocrOptions: NSDictionary, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
-    print("data", data)
-    print("ocrInputType", ocrInputType)
-    print("ocrInputType", ocrOptions)
+    let scanImage: UIImage? = ocrInputType == "BASE64" ? convertBase64StringToImage(imageBase64String: data) : UIImage(contentsOfFile: data)
 
-    let scanImage: UIImage? = ocrInputType == "Base64" ? convertBase64StringToImage(imageBase64String: data) : UIImage(contentsOfFile: data)
-
-    guard let cgImage = scanImage?.cgImage else { return }
+    guard let cgImage = scanImage?.cgImage else {
+      return
+    }
 
     let requestHandler = VNImageRequestHandler(cgImage: cgImage)
 
@@ -43,22 +41,28 @@ class RnOcrLib: RCTEventEmitter {
     // resolve("works")
   }
 
-  func convertBase64StringToImage (imageBase64String:String) -> UIImage {
-    let imageData = Data(base64Encoded: imageBase64String)
-    let image = UIImage(data: imageData!)
-    return image!
+  func convertBase64StringToImage (imageBase64String: String) -> UIImage? {
+      if let imageData = Data(base64Encoded: imageBase64String) {
+          let image = UIImage(data: imageData)
+          return image!
+      }
+      
+      return nil
   }
 
   func recognizeTextHandler(request: VNRequest, error: Error?) {
     guard let observations =
             request.results as? [VNRecognizedTextObservation] else {
-        return
+      return
     }
+
     let recognizedStrings = observations.compactMap { observation in
         // Return the string of the top VNRecognizedText instance.
-        return observation.topCandidates(1).first?.string
+      return observation.topCandidates(1).first?.string
     }
+
+    let recognizedString = recognizedStrings.joined(separator: "\n")
     
-    self.sendEvent(withName: "progress", body: [C_FINISHED_EVENT: ["text": recognizedStrings]])
+    self.sendEvent(withName: C_FINISHED_EVENT, body: ["text": recognizedString])
   }
 }
