@@ -1,5 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
-import { DataInputType, OCROptions, PageSegMode } from './types';
+import { DataInputType, OCROptions, PageSegMode, langMapping } from './types';
 
 const LINKING_ERROR =
   `The package 'rn-ocr-lib' doesn't seem to be linked. Make sure: \n\n` +
@@ -28,7 +28,16 @@ export const getText = (
   inputType: DataInputType,
   options?: Partial<OCROptions>
 ): void => {
-  RnOcrLib.getText(data, inputType, { ...defaultOptions, ...options });
+  const finalOptions = {
+    ...defaultOptions,
+    ...options,
+  };
+
+  if (finalOptions.lang && Platform.OS === 'ios') {
+    finalOptions.lang = langMapping[finalOptions.lang];
+  }
+
+  RnOcrLib.getText(data, inputType, finalOptions);
 };
 
 export { DataInputType, OCROptions, PageSegMode };

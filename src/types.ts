@@ -24,3 +24,9 @@ export interface OCROptions {
   pageSegMode: PageSegMode;
   lang: string;
 }
+
+export const langMapping: Record<string, string> = {
+  eng: 'en-US',
+  fra: 'fr-FR',
+  tam: 'ta-IN',
+};

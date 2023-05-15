@@ -21,8 +21,12 @@ class RnOcrLib: RCTEventEmitter {
     let requestHandler = VNImageRequestHandler(cgImage: cgImage)
 
     let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
+
+    if let lang = ocrOptions.value(forKey: "lang") as? String {
+      request.recognitionLanguages = [lang]
+    }
+      
     request.recognitionLevel = .accurate
-    request.recognitionLanguages = ["en_GB"]
     request.progressHandler = recognizeProgressHandler(request:progress:error:)
 
     do {
@@ -35,8 +39,8 @@ class RnOcrLib: RCTEventEmitter {
 
   func convertBase64StringToImage (imageBase64String: String) -> UIImage? {
     if let imageData = Data(base64Encoded: imageBase64String) {
-        let image = UIImage(data: imageData)
-        return image!
+      let image = UIImage(data: imageData)
+      return image!
     }
     
     return nil
@@ -48,7 +52,7 @@ class RnOcrLib: RCTEventEmitter {
 
   func recognizeTextHandler(request: VNRequest, error: Error?) -> Void {
     guard let observations =
-            request.results as? [VNRecognizedTextObservation] else {
+      request.results as? [VNRecognizedTextObservation] else {
       return
     }
 

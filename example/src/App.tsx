@@ -82,8 +82,9 @@ export default function App() {
           selectedValue={lang}
           onValueChange={(itemValue) => setLang(itemValue)}
         >
-          <Picker.Item label="Tamil" value="tam" />
+          <Picker.Item label="France" value="fra" />
           <Picker.Item label="English" value="eng" />
+          <Picker.Item label="Tamil" value="tam" />
         </Picker>
         <View style={styles.buttonContainer}>
           <Button title="Pick image" onPress={handlePickImage} />
