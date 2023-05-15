@@ -10,6 +10,7 @@ import {
   NativeModules,
   ScrollView,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { launchImageLibrary } from 'react-native-image-picker';
 import FastImage from 'react-native-fast-image';
 
@@ -23,6 +24,7 @@ export default function App() {
   const [text, setText] = useState<string>('');
   const [progress, setProgress] = useState<number>(0);
   const [uri, setUri] = useState<string>('');
+  const [lang, setLang] = useState<string>('tam');
 
   const handlePickImage = async () => {
     try {
@@ -43,7 +45,7 @@ export default function App() {
 
   const handleOcr = async (): Promise<void> => {
     try {
-      getText(uri.replace('file://', ''), DataInputType.file);
+      getText(uri.replace('file://', ''), DataInputType.file, { lang });
     } catch (err) {}
   };
 
@@ -72,6 +74,14 @@ export default function App() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Picker
+          style={styles.picker}
+          selectedValue={lang}
+          onValueChange={(itemValue) => setLang(itemValue)}
+        >
+          <Picker.Item label="Tamil" value="tam" />
+          <Picker.Item label="English" value="eng" />
+        </Picker>
         <View style={styles.buttonContainer}>
           <Button title="Pick image" onPress={handlePickImage} />
           <Button title="Do OCR" onPress={handleOcr} />
@@ -126,6 +136,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
+    flex: 1,
+  },
+  picker: {
     flex: 1,
   },
 });

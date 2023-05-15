@@ -8,6 +8,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.module.annotations.ReactModule;
 
 import android.graphics.Bitmap;
@@ -45,14 +46,14 @@ public class RnOcrLibModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void getText(String data, String ocrInputType, int pageSegMode, Promise promise) {
+  public void getText(String data, String ocrInputType, ReadableMap ocrOptions, Promise promise) {
     if (data.isEmpty()) {
       promise.reject(ocrInputType + " data is empty");
       return;
     }
 
     try {
-      ocrUtil.getText(data, ocrInputType, pageSegMode);
+      ocrUtil.getText(data, ocrInputType, ocrOptions);
       promise.resolve("");
     } catch (Exception e) {
       promise.reject(e.getMessage());

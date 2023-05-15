@@ -13,6 +13,12 @@ React native library to perform OCR on images.
 npm install rn-ocr-lib
 ```
 
+## Setup
+
+### Android
+
+Create folder `app/src/main/assets/tessdata`. Inside `tessdata` place `${lang}.traineddata`.
+
 ## Usage
 
 ```JSX
@@ -45,6 +51,7 @@ const IMAGE_DATA: string = "data:image/png;base64,iVBORw0...";
 const App = () => {
   const [res, setRes] = useState("");
   // const [progress, setProgress] = useState(0);
+
 
   const { height } = useWindowDimensions();
 

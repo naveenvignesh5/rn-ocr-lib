@@ -1,4 +1,4 @@
-export enum PageSetMode {
+export enum PageSegMode {
   PSM_OSD_ONLY,
   PSM_AUTO_OSD,
   PSM_AUTO_ONLY,
@@ -21,5 +21,6 @@ export enum DataInputType {
 }
 
 export interface OCROptions {
-  pageSetMode: PageSetMode;
+  pageSegMode: PageSegMode;
+  lang: string;
 }

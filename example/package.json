@@ -9,6 +9,7 @@
     "pods": "pod-install --quiet"
   },
   "dependencies": {
+    "@react-native-picker/picker": "^2.4.10",
     "react": "18.2.0",
     "react-native": "0.71.6",
     "react-native-fast-image": "^8.6.3",

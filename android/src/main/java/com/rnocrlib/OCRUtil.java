@@ -10,6 +10,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReadableMap;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 import com.googlecode.tesseract.android.TessBaseAPI.ProgressNotifier;
@@ -37,7 +38,6 @@ public class OCRUtil {
         extractTrainData(context);
 
         initTessBaseApi();
-        initTessLangModel();
     }
 
     private void initTessBaseApi() {
@@ -56,7 +56,7 @@ public class OCRUtil {
         baseApi.setPageSegMode(pageMode);
     }
 
-    private void initTessLangModel() {
+    private void initTessLangModel(String lang) {
         // get traindata path from local storage
         String dataPath = context.getFilesDir().getPath();
 
@@ -65,13 +65,18 @@ public class OCRUtil {
 
         // initialize the app with data model if directory is present
         if (f.exists()) {
-            baseApi.init(dataPath, "eng");
+            baseApi.init(dataPath, lang);
         }
     }
 
     // call tesseract api and recognize english text from bitmap image
-    public void getText(String data, String ocrInputType, int pageSegMode) throws IOException {
+    public void getText(String data, String ocrInputType, ReadableMap ocrOptions) throws IOException {
+        int pageSegMode = ocrOptions.getInt("pageSegMode");
+        String lang = ocrOptions.getString("lang");
+
         new Thread(() -> {
+            initTessLangModel(lang);
+
             baseApi.setPageSegMode(pageSegMode);
 
             if (ocrInputType.equals("BASE64")) {
