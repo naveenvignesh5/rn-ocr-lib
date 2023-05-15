@@ -46,7 +46,9 @@ export default function App() {
   const handleOcr = async (): Promise<void> => {
     try {
       getText(uri.replace('file://', ''), DataInputType.file, { lang });
-    } catch (err) {}
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleClear = () => {
@@ -57,6 +59,7 @@ export default function App() {
 
   useEffect(() => {
     eventEmitter.addListener('finished', (event) => {
+      console.log(event);
       setProgress(100);
       setText(event.text);
     });
