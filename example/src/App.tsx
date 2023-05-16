@@ -59,13 +59,12 @@ export default function App() {
 
   useEffect(() => {
     eventEmitter.addListener('finished', (event) => {
-      console.log(event);
       setProgress(100);
       setText(event.text);
     });
 
     eventEmitter.addListener('progress', (event) => {
-      setProgress(event.percent);
+      setProgress(Math.round(event.percent));
     });
 
     return () => {

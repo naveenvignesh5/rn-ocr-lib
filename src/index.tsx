@@ -37,6 +37,10 @@ export const getText = (
     finalOptions.lang = langMapping[finalOptions.lang];
   }
 
+  if (inputType === DataInputType.base64) {
+    data = data.replace(new RegExp('^data:image/[^;]*;base64,?', 'gi'), '');
+  }
+
   RnOcrLib.getText(data, inputType, finalOptions);
 };
 
