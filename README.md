@@ -2,6 +2,10 @@
 
 React native library to perform OCR on images.
 
+**Note:**
+
+Library is being developed and evolving at a fast pace. Kindly expect frequest releases.
+
 ## Installation
 
 ```sh
@@ -12,7 +16,7 @@ npm install rn-ocr-lib
 
 ### Android
 
-Create folder `app/src/main/assets/tessdata`. Inside `tessdata` place `${lang}.traineddata`.
+Create folder `app/src/main/assets/tessdata`. Inside `tessdata` place `${lang}.traineddata`. You can get the train data files from [here](https://tesseract-ocr.github.io/tessdoc/Data-Files.html).
 
 ## Usage
 
@@ -40,13 +44,12 @@ const styles = StyleSheet.create({
   }
 });
 
-// replace with valid base64 string - https://base64.guru/converter/encode/image
+// Replace with valid base64 string. Image to base64 => https://base64.guru/converter/encode/image
 const IMAGE_DATA: string = "data:image/png;base64,iVBORw0...";
 
 const App = () => {
   const [res, setRes] = useState("");
   // const [progress, setProgress] = useState(0);
-
 
   const { height } = useWindowDimensions();
 
