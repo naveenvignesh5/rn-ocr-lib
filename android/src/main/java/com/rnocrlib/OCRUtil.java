@@ -11,6 +11,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableArray;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
 import com.googlecode.tesseract.android.TessBaseAPI.ProgressNotifier;
@@ -22,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.StringBuilder;
 
 public class OCRUtil {
     // tesseract base api instances for mrz and english train data models
@@ -56,7 +58,7 @@ public class OCRUtil {
         baseApi.setPageSegMode(pageMode);
     }
 
-    private void initTessLangModel(String lang) {
+    private void initTessLangModel(ReadableArray lang, int ocrEngineMode) {
         // get traindata path from local storage
         String dataPath = context.getFilesDir().getPath();
 
@@ -65,17 +67,32 @@ public class OCRUtil {
 
         // initialize the app with data model if directory is present
         if (f.exists()) {
-            baseApi.init(dataPath, lang);
+            baseApi.init(dataPath, joinReadableArray(lang, "+"), ocrEngineMode);
         }
+    }
+
+    private String joinReadableArray(ReadableArray array, String joiner) {
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < array.size(); i++) {
+            if (i > 0) {
+                result.append(joiner);
+            }
+
+            result.append(array.getString(i));
+        }
+
+        return result.toString();
     }
 
     // call tesseract api and recognize english text from bitmap image
     public void getText(String data, String ocrInputType, ReadableMap ocrOptions) throws IOException {
         int pageSegMode = ocrOptions.getInt("pageSegMode");
-        String lang = ocrOptions.getString("lang");
+        int ocrEngineMode = ocrOptions.getInt("ocrEngineMode");
+        ReadableArray lang = ocrOptions.getArray("lang");
 
         new Thread(() -> {
-            initTessLangModel(lang);
+            initTessLangModel(lang, ocrEngineMode);
 
             baseApi.setPageSegMode(pageSegMode);
 

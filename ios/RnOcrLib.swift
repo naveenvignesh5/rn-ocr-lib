@@ -22,11 +22,14 @@ class RnOcrLib: RCTEventEmitter {
 
     let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
 
-    if let lang = ocrOptions.value(forKey: "lang") as? String {
-      request.recognitionLanguages = [lang]
+    if let lang = ocrOptions.value(forKey: "lang") as? [String] {
+      request.recognitionLanguages = lang
     }
-      
-    request.recognitionLevel = .accurate
+
+    if let ocrEngineMode = ocrOptions.value(forKey: "ocrEngineMode") as? Int {
+      request.recognitionLevel = ocrEngineMode == 0 ? .fast : .accurate
+    }
+
     request.progressHandler = recognizeProgressHandler(request:progress:error:)
 
     do {

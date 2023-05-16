@@ -1,5 +1,12 @@
 import { NativeModules, Platform } from 'react-native';
-import { DataInputType, OCROptions, PageSegMode, langMapping } from './types';
+import {
+  DataInputType,
+  OCROptions,
+  OcrEngineMode,
+  PageSegMode,
+  iOSLangMapping,
+  tesseractSupportedLanguages,
+} from './types';
 
 const LINKING_ERROR =
   `The package 'rn-ocr-lib' doesn't seem to be linked. Make sure: \n\n` +
@@ -18,10 +25,19 @@ const RnOcrLib = NativeModules.RnOcrLib
       }
     );
 
-const defaultOptions: Partial<OCROptions> = {
+const defaultOptions: OCROptions = {
   pageSegMode: PageSegMode.PSM_SINGLE_BLOCK,
-  lang: 'eng',
+  ocrEngineMode: OcrEngineMode.FAST,
+  lang: ['eng'],
 };
+
+const tessLangMap: Record<string, boolean> = tesseractSupportedLanguages.reduce(
+  (acc, o) => ({
+    ...acc,
+    [o]: true,
+  }),
+  {}
+);
 
 export const getText = (
   data: string,
@@ -33,8 +49,20 @@ export const getText = (
     ...options,
   };
 
-  if (finalOptions.lang && Platform.OS === 'ios') {
-    finalOptions.lang = langMapping[finalOptions.lang];
+  if (Platform.OS === 'ios') {
+    finalOptions.lang = (finalOptions.lang || []).reduce((acc: string[], o) => {
+      if (iOSLangMapping[o]) {
+        acc.push(iOSLangMapping[o] || '');
+      }
+
+      return acc;
+    }, []);
+  } else {
+    finalOptions.lang = finalOptions.lang.filter((o) => tessLangMap[o]);
+  }
+
+  if (!finalOptions.lang.length) {
+    throw new Error('Unsupported language');
   }
 
   if (inputType === DataInputType.base64) {
@@ -44,4 +72,4 @@ export const getText = (
   RnOcrLib.getText(data, inputType, finalOptions);
 };
 
-export { DataInputType, OCROptions, PageSegMode };
+export { DataInputType, OCROptions, PageSegMode, OcrEngineMode };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-
 import {
+  SafeAreaView,
   StyleSheet,
   View,
   Button,
@@ -10,11 +10,9 @@ import {
   NativeModules,
   ScrollView,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { getText, DataInputType, OcrEngineMode } from 'rn-ocr-lib';
 import FastImage from 'react-native-fast-image';
-
-import { getText, DataInputType } from 'rn-ocr-lib';
 
 const eventEmitter = new NativeEventEmitter(NativeModules.RnOcrLib);
 
@@ -24,7 +22,6 @@ export default function App() {
   const [text, setText] = useState<string>('');
   const [progress, setProgress] = useState<number>(0);
   const [uri, setUri] = useState<string>('');
-  const [lang, setLang] = useState<string>('tam');
 
   const handlePickImage = async () => {
     try {
@@ -45,7 +42,10 @@ export default function App() {
 
   const handleOcr = async (): Promise<void> => {
     try {
-      getText(uri.replace('file://', ''), DataInputType.file, { lang });
+      getText(uri.replace('file://', ''), DataInputType.file, {
+        ocrEngineMode: OcrEngineMode.ACCURATE,
+        lang: ['eng', 'tam'],
+      });
     } catch (err) {
       console.log(err);
     }
@@ -74,17 +74,8 @@ export default function App() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Picker
-          style={styles.picker}
-          selectedValue={lang}
-          onValueChange={(itemValue) => setLang(itemValue)}
-        >
-          <Picker.Item label="France" value="fra" />
-          <Picker.Item label="English" value="eng" />
-          <Picker.Item label="Tamil" value="tam" />
-        </Picker>
         <View style={styles.buttonContainer}>
           <Button title="Pick image" onPress={handlePickImage} />
           <Button title="Do OCR" onPress={handleOcr} />
@@ -105,7 +96,7 @@ export default function App() {
         )}
         {text && <Text style={styles.textContent}>{text}</Text>}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
