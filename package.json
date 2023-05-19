@@ -38,8 +38,19 @@
   },
   "keywords": [
     "react-native",
-    "ios",
-    "android"
+    "ocr",
+    "optical-character-recognition",
+    "text-recognition",
+    "image-processing",
+    "image-to-text",
+    "scanning",
+    "document-scanning",
+    "mobile-ocr",
+    "text-extraction",
+    "react-native-ocr",
+    "react-native-library",
+    "android",
+    "ios"
   ],
   "repository": "https://github.com/naveenvignesh5/rn-ocr-lib",
   "author": "Naveen Vignesh <naveenvignesh5.nv@gmail.com> (https://github.com/naveenvignesh5)",
