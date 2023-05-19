@@ -1,10 +1,6 @@
 # rn-ocr-lib
 
-React native library to perform OCR on images.
-
-**Note:**
-
-Library is being developed and evolving at a fast pace. Kindly expect frequest releases.
+React native library to perform OCR on images. This library uses Tesseract library for image processing in android and vision library for iOS.
 
 ## Installation
 
@@ -20,76 +16,111 @@ Create folder `app/src/main/assets/tessdata`. Inside `tessdata` place `${lang}.t
 
 ## Usage
 
-```JSX
-import React, { useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Button,
-  useWindowDimensions,
-  Text,
-  NativeEventEmitter,
-  NativeModules,
-  ScrollView,
-} from 'react-native';
-import { getText, DataInputType } from 'rn-ocr-lib';
+Kindly refer the [example](example/) project for usage for Android and iOS.
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'column',
-    gap: 10,
-  },
-  result: {
-    marginTop: 10,
+## API Reference
+
+### Methods
+
+```javascript
+import { getText, useOCREventListener } from 'rn-ocr-lib';
+```
+
+**getText**
+
+Call this method to initiate image processing
+
+```typescript
+getText(data: string, dataInputType: DataInputType, options?: Partial<OCROptions>): void;
+```
+
+**useOCREventListener**
+
+Call this hook to setup listener to listen to progress, result and error.
+
+```typescript
+useOCREventListener((event: OCREventType, data) => {
+  if (event === OCREvent.FINISHED) {
+    // console.log(data.text)
+    return;
+  }
+
+  if (event === OCREvent.PROGRESS) {
+    // console.log(data.percent)
+    return;
+  }
+
+  if (event === OCREvent.ERROR) {
+    // console.log(data.message)
   }
 });
-
-// Replace with valid base64 string. Image to base64 => https://base64.guru/converter/encode/image
-const IMAGE_DATA: string = "data:image/png;base64,iVBORw0...";
-
-const App = () => {
-  const [res, setRes] = useState("");
-  // const [progress, setProgress] = useState(0);
-
-  const { height } = useWindowDimensions();
-
-  const handleOCR = () => {
-    getText(IMAGE_DATA, DataInputType.base64);
-  }
-
-  useEffect(() => {
-    const eventEmitter = new NativeEventEmitter(NativeModules.RnOcrLib);
-
-    eventEmitter.addListener('finished', (event) => {
-      // setProgress(100);
-      setText(event.text);
-    });
-
-    // add progress to percent
-    // eventEmitter.addListener('progress', (event) => {
-    //   setProgress(event.percent);
-    // });
-
-    return () => {
-      eventEmitter.removeAllListeners('finished');
-      eventEmitter.removeAllListeners('progress');
-    };
-  }, []);
-
-  return (
-    <View style={styles.container}>
-      <Button title="Do OCR" onPress={handleOCR} />
-      <Image
-        style={{ height: height * 0.5 }}
-        source={{
-          uri: IMAGE_DATA
-        }}
-      />
-      {!!res && <Text style={styles.result}>{res}</Text>}
-    </View>
-  );
-};
 ```
+
+### Types
+
+**DataInputType**
+
+| Input type | Value  | Description        |
+| ---------- | ------ | ------------------ |
+| file       | FILE   | Path to image file |
+| base64     | BASE64 | Base 64 string     |
+
+**Options**
+
+| Option        | iOS | Android | Default      | Description                                         |
+| ------------- | --- | ------- | ------------ | --------------------------------------------------- |
+| ocrEngineMode | Yes | Yes     | FAST         | Type of mode between fast or accurate recognization |
+| pageSegMode   | No  | Yes     | PSM_OSD_ONLY | Page seg mode of tesseract                          |
+| lang          | Yes | Yes     | ["eng"]      | Languages for which recognization is needed         |
+
+**Types**
+
+```typescript
+enum OcrEngineMode {
+  FAST, // 0
+  ACCURATE, // 1
+  FAST_ACCURATE, // 2 - for iOS equivalent to accurate
+}
+
+// Tesseract - https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html#page-segmentation-method
+enum PageSegMode {
+  PSM_OSD_ONLY, // 0
+  PSM_AUTO_OSD, // 1
+  PSM_AUTO_ONLY, // 2
+  PSM_AUTO, // 3
+  PSM_SINGLE_COLUMN, // 4
+  PSM_SINGLE_BLOCK_VERT_TEXT, // 5
+  PSM_SINGLE_BLOCK, // 6
+  PSM_SINGLE_LINE, // 7
+  PSM_SINGLE_WORD, // 8
+  PSM_CIRCLE_WORD, // 9
+  PSM_SINGLE_CHAR, // 10
+  PSM_SPARSE_TEXT, // 11
+  PSM_SPARSE_TEXT_OSD, // 12
+  PSM_RAW_LINE, // 13
+}
+```
+
+## Language Support
+
+### Android
+
+[Here](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html) is the list of supported languages for android.
+
+### iOS
+
+Vision library currently has limited language support. It supports the following languages.
+
+| Language            | Code    |
+| ------------------- | ------- |
+| English             | eng     |
+| France              | fra     |
+| Italian             | ita     |
+| German              | deu     |
+| Spanish             | spa     |
+| Portuguese          | por     |
+| Chinese Simplified  | chi_sim |
+| Chinese Traditional | chi_tra |
 
 ## Contributing
 
