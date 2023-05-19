@@ -32,6 +32,10 @@ public class OCRUtil {
     private TessBaseAPI baseApi;
     private int pageMode = PageSegMode.PSM_SINGLE_BLOCK;
 
+    private static final String PROGRESS_EVENT = "progress";
+    private static final String ERROR_EVENT = "error";
+    private static final String FINISHED_EVENT = "finished";
+
     // override constructor with context as argument
     public OCRUtil(ReactApplicationContext ctx) throws IOException {
         context = ctx;
@@ -42,23 +46,26 @@ public class OCRUtil {
         initTessBaseApi();
     }
 
+    private void emitProgress(int percent) {
+        WritableMap params = Arguments.createMap();
+        params.putInt("percent", percent);
+
+        sendEvent(context, PROGRESS_EVENT, params);
+    }
+
     private void initTessBaseApi() {
         baseApi = new TessBaseAPI(new ProgressNotifier() {
             @Override
             public void onProgressValues(ProgressValues progressValues) {
                 int percent = progressValues.getPercent();
-
-                WritableMap params = Arguments.createMap();
-                params.putInt("percent", percent);
-
-                sendEvent(context, "progress", params);
+                emitProgress(percent);
             }
         });
 
         baseApi.setPageSegMode(pageMode);
     }
 
-    private void initTessLangModel(ReadableArray lang, int ocrEngineMode) {
+    private boolean initTessLangModel(ReadableArray lang, int ocrEngineMode) {
         // get traindata path from local storage
         String dataPath = context.getFilesDir().getPath();
 
@@ -67,8 +74,10 @@ public class OCRUtil {
 
         // initialize the app with data model if directory is present
         if (f.exists()) {
-            baseApi.init(dataPath, joinReadableArray(lang, "+"), ocrEngineMode);
+            return baseApi.init(dataPath, joinReadableArray(lang, "+"), ocrEngineMode);
         }
+
+        return false;
     }
 
     private String joinReadableArray(ReadableArray array, String joiner) {
@@ -92,7 +101,13 @@ public class OCRUtil {
         ReadableArray lang = ocrOptions.getArray("lang");
 
         new Thread(() -> {
-            initTessLangModel(lang, ocrEngineMode);
+            WritableMap params = Arguments.createMap();
+
+            if (!initTessLangModel(lang, ocrEngineMode)) {
+                params.putString("message", "Unable to initialize tesseract");
+                sendEvent(context, ERROR_EVENT, params);
+                return;
+            }
 
             baseApi.setPageSegMode(pageSegMode);
 
@@ -105,10 +120,9 @@ public class OCRUtil {
             baseApi.getHOCRText(0);
             String text = baseApi.getUTF8Text();
 
-            WritableMap params = Arguments.createMap();
             params.putString("text", text);
-
-            sendEvent(context, "finished", params);
+            sendEvent(context, FINISHED_EVENT, params);
+            emitProgress(100);
         }).start();
     }
 

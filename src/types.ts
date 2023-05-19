@@ -26,11 +26,19 @@ export enum DataInputType {
   base64 = 'BASE64',
 }
 
+export enum OCREvent {
+  FINISHED = 'finished',
+  ERROR = 'error',
+  PROGRESS = 'progress',
+}
+
 export interface OCROptions {
   pageSegMode: PageSegMode;
   ocrEngineMode: OcrEngineMode;
   lang: string[];
 }
+
+export type OCREventListenerCallback = (event: OCREvent, data: any) => void;
 
 export const iOSLangMapping: Record<string, string> = {
   eng: 'en-US',

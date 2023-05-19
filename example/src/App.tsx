@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -6,15 +6,17 @@ import {
   Button,
   useWindowDimensions,
   Text,
-  NativeEventEmitter,
-  NativeModules,
   ScrollView,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { getText, DataInputType, OcrEngineMode } from 'rn-ocr-lib';
+import {
+  getText,
+  DataInputType,
+  OcrEngineMode,
+  OCREvent,
+  useOCREventListener,
+} from 'rn-ocr-lib';
 import FastImage from 'react-native-fast-image';
-
-const eventEmitter = new NativeEventEmitter(NativeModules.RnOcrLib);
 
 export default function App() {
   const { width, height } = useWindowDimensions();
@@ -22,6 +24,7 @@ export default function App() {
   const [text, setText] = useState<string>('');
   const [progress, setProgress] = useState<number>(0);
   const [uri, setUri] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
   const handlePickImage = async () => {
     try {
@@ -44,7 +47,7 @@ export default function App() {
     try {
       getText(uri.replace('file://', ''), DataInputType.file, {
         ocrEngineMode: OcrEngineMode.ACCURATE,
-        lang: ['eng', 'tam'],
+        lang: ['tam', 'eng', 'fra'],
       });
     } catch (err) {
       console.log(err);
@@ -57,21 +60,21 @@ export default function App() {
     setProgress(0);
   };
 
-  useEffect(() => {
-    eventEmitter.addListener('finished', (event) => {
-      setProgress(100);
-      setText(event.text);
-    });
+  useOCREventListener((event, data) => {
+    if (event === OCREvent.FINISHED) {
+      setText(data.text);
+      return;
+    }
 
-    eventEmitter.addListener('progress', (event) => {
-      setProgress(Math.round(event.percent));
-    });
+    if (event === OCREvent.PROGRESS) {
+      setProgress(Math.round(data.percent));
+      return;
+    }
 
-    return () => {
-      eventEmitter.removeAllListeners('finished');
-      eventEmitter.removeAllListeners('progress');
-    };
-  }, []);
+    if (event === OCREvent.ERROR) {
+      setError(data.message);
+    }
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -95,6 +98,9 @@ export default function App() {
           />
         )}
         {text && <Text style={styles.textContent}>{text}</Text>}
+        {error && (
+          <Text style={[styles.textContent, styles.errorText]}>{error}</Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -109,6 +115,10 @@ const styles = StyleSheet.create({
   },
   textContent: {
     margin: 12,
+    fontSize: 12,
+  },
+  errorText: {
+    color: 'red',
   },
   scrollContainer: {
     padding: 4,

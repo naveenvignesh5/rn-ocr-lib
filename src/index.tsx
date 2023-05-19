@@ -1,11 +1,14 @@
-import { NativeModules, Platform } from 'react-native';
+import { useEffect } from 'react';
+import { NativeModules, Platform, NativeEventEmitter } from 'react-native';
 import {
   DataInputType,
   OCROptions,
   OcrEngineMode,
   PageSegMode,
+  OCREvent,
   iOSLangMapping,
   tesseractSupportedLanguages,
+  OCREventListenerCallback,
 } from './types';
 
 const LINKING_ERROR =
@@ -72,4 +75,30 @@ export const getText = (
   RnOcrLib.getText(data, inputType, finalOptions);
 };
 
-export { DataInputType, OCROptions, PageSegMode, OcrEngineMode };
+export const useOCREventListener = (cb: OCREventListenerCallback) => {
+  useEffect(() => {
+    if (!cb) return;
+
+    const eventEmitter = new NativeEventEmitter(NativeModules.RnOcrLib);
+
+    eventEmitter.addListener(OCREvent.FINISHED, (event) => {
+      cb(OCREvent.FINISHED, event);
+    });
+
+    eventEmitter.addListener(OCREvent.PROGRESS, (event) => {
+      cb(OCREvent.PROGRESS, event);
+    });
+
+    eventEmitter.addListener(OCREvent.ERROR, (event) => {
+      cb(OCREvent.ERROR, event);
+    });
+
+    return () => {
+      eventEmitter.removeAllListeners(OCREvent.FINISHED);
+      eventEmitter.removeAllListeners(OCREvent.PROGRESS);
+      eventEmitter.removeAllListeners(OCREvent.ERROR);
+    };
+  }, [cb]);
+};
+
+export { DataInputType, OCROptions, PageSegMode, OcrEngineMode, OCREvent };

@@ -5,9 +5,10 @@ import Vision
 class RnOcrLib: RCTEventEmitter {
   let C_FINISHED_EVENT: String = "finished";
   let C_PROGRESS_EVENT: String = "progress";
+  let C_ERROR_EVENT: String = "error";
 
   override func supportedEvents() -> [String]! {
-    return [C_FINISHED_EVENT, C_PROGRESS_EVENT]
+    return [C_FINISHED_EVENT, C_PROGRESS_EVENT, C_ERROR_EVENT]
   }
 
   @objc(getText:withOcrInputType:withOcrOptions:withResolver:withRejecter:)
@@ -50,11 +51,21 @@ class RnOcrLib: RCTEventEmitter {
   }
 
   func recognizeProgressHandler(request: VNRequest, progress: Double, error: Error?) -> Void {
+    if error != nil {
+      self.sendEvent(withName: C_ERROR_EVENT, body: ["message": error])
+      return
+    }
+
     self.sendEvent(withName: C_PROGRESS_EVENT, body: ["percent": progress * 100])
   }
 
   func recognizeTextHandler(request: VNRequest, error: Error?) -> Void {
-    guard let observations =
+    if error != nil {
+      self.sendEvent(withName: C_ERROR_EVENT, body: ["message": error])
+      return
+    }
+
+    guard let observations: [VNRecognizedTextObservation] =
       request.results as? [VNRecognizedTextObservation] else {
       return
     }
