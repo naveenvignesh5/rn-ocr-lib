@@ -67,7 +67,7 @@ export default function App() {
     }
 
     if (event === OCREvent.PROGRESS) {
-      setProgress(Math.round(data.percent));
+      setProgress(data.percent);
       return;
     }
 

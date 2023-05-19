@@ -32,13 +32,22 @@ export enum OCREvent {
   PROGRESS = 'progress',
 }
 
+interface OCREventResponse {
+  text: string;
+  message: string;
+  percent: number;
+}
+
 export interface OCROptions {
   pageSegMode: PageSegMode;
   ocrEngineMode: OcrEngineMode;
   lang: string[];
 }
 
-export type OCREventListenerCallback = (event: OCREvent, data: any) => void;
+export type OCREventListenerCallback = (
+  event: OCREvent,
+  data: OCREventResponse
+) => void;
 
 export const iOSLangMapping: Record<string, string> = {
   eng: 'en-US',
