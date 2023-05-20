@@ -2,10 +2,16 @@
 
 React native library to perform OCR on images. This library uses Tesseract library for image processing in android and vision library for iOS.
 
+[![Npm package version](https://badgen.net/npm/v/rn-ocr-lib)](https://npmjs.com/package/rn-ocr-lib) [![Npm package monthly downloads](https://badgen.net/npm/dm/rn-ocr-lib)](https://npmjs.com/package/rn-ocr-lib) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+![React Native](https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
+
 ## Installation
 
 ```sh
 npm install rn-ocr-lib
+# or
+yarn add rn-ocr-lib
 ```
 
 ## Setup
@@ -13,6 +19,14 @@ npm install rn-ocr-lib
 ### Android
 
 Create folder `app/src/main/assets/tessdata`. Inside `tessdata` place `${lang}.traineddata`. You can get the train data files from [here](https://tesseract-ocr.github.io/tessdoc/Data-Files.html).
+
+### iOS
+
+Vision library is present in iOS from version 13 or above. So update `ios/Podfile`.
+
+```ruby
+platform :ios, '13.0'
+```
 
 ## Usage
 
@@ -39,67 +53,86 @@ getText(data: string, dataInputType: DataInputType, options?: Partial<OCROptions
 Call this hook to setup listener to listen to progress, result and error.
 
 ```typescript
-useOCREventListener((event: OCREventType, data) => {
-  if (event === OCREvent.FINISHED) {
-    // console.log(data.text)
-    return;
-  }
+useOCREventListener(
+  (event: OCREventType, ocrEventResponse: OCREventResponse) => {
+    if (event === OCREvent.FINISHED) {
+      // console.log(ocrEventResponse.text)
+      return;
+    }
 
-  if (event === OCREvent.PROGRESS) {
-    // console.log(data.percent)
-    return;
-  }
+    if (event === OCREvent.PROGRESS) {
+      // console.log(ocrEventResponse.percent)
+      return;
+    }
 
-  if (event === OCREvent.ERROR) {
-    // console.log(data.message)
+    if (event === OCREvent.ERROR) {
+      // console.log(ocrEventResponse.message)
+    }
   }
-});
+);
 ```
 
-### Types
+### Parameters
 
-**DataInputType**
+**dataInputType**
 
 | Input type | Value  | Description        |
 | ---------- | ------ | ------------------ |
 | file       | FILE   | Path to image file |
 | base64     | BASE64 | Base 64 string     |
 
-**Options**
+**options**
 
-| Option        | iOS | Android | Default      | Description                                         |
-| ------------- | --- | ------- | ------------ | --------------------------------------------------- |
-| ocrEngineMode | Yes | Yes     | FAST         | Type of mode between fast or accurate recognization |
-| pageSegMode   | No  | Yes     | PSM_OSD_ONLY | Page seg mode of tesseract                          |
-| lang          | Yes | Yes     | ["eng"]      | Languages for which recognization is needed         |
+| Option        | Type          | iOS | Android | Default      | Description                                         |
+| ------------- | ------------- | --- | ------- | ------------ | --------------------------------------------------- |
+| ocrEngineMode | OCREngineMode | Yes | Yes     | FAST         | Type of mode between fast or accurate recognization |
+| pageSegMode   | PageSegMode   | No  | Yes     | PSM_OSD_ONLY | Page seg mode of tesseract                          |
+| lang          | string[]      | Yes | Yes     | ["eng"]      | Languages for which recognization is needed         |
 
-**Types**
+**ocrEngineMode**
 
-```typescript
-enum OcrEngineMode {
-  FAST, // 0
-  ACCURATE, // 1
-  FAST_ACCURATE, // 2 - for iOS equivalent to accurate
-}
+| Engine Mode   | Value | Description                                                                                                                                            |
+| ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| FAST          | 0     | Fast mode where recognization will be faster but mismatch of words is possible                                                                         |
+| ACCURATE      | 1     | Accurate mode where time to process is more but more accurate text will be obtained                                                                    |
+| FAST_ACCURATE | 2     | Relavant for android tesseract where train data is provided for accurate and fast results but traindata file may be biggers compared to previous modes |
 
-// Tesseract - https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html#page-segmentation-method
-enum PageSegMode {
-  PSM_OSD_ONLY, // 0
-  PSM_AUTO_OSD, // 1
-  PSM_AUTO_ONLY, // 2
-  PSM_AUTO, // 3
-  PSM_SINGLE_COLUMN, // 4
-  PSM_SINGLE_BLOCK_VERT_TEXT, // 5
-  PSM_SINGLE_BLOCK, // 6
-  PSM_SINGLE_LINE, // 7
-  PSM_SINGLE_WORD, // 8
-  PSM_CIRCLE_WORD, // 9
-  PSM_SINGLE_CHAR, // 10
-  PSM_SPARSE_TEXT, // 11
-  PSM_SPARSE_TEXT_OSD, // 12
-  PSM_RAW_LINE, // 13
-}
-```
+**pageSegMode (Android)**
+
+By default Tesseract expects a page of text when it segments an image. If you’re just seeking to OCR a small region, try a different segmentation mode.
+
+| Segmentation Mode          | Value | Description                                                                                   |
+| -------------------------- | ----- | --------------------------------------------------------------------------------------------- |
+| PSM_OSD_ONLY               | 0     | Orientation and script detection (OSD) only.                                                  |
+| PSM_AUTO_OSD               | 1     | Automatic page segmentation with OSD.                                                         |
+| PSM_AUTO_ONLY              | 2     | Automatic page segmentation, but no OSD, or OCR.                                              |
+| PSM_AUTO                   | 3     | Fully automatic page segmentation, but no OSD. (Default)                                      |
+| PSM_SINGLE_COLUMN          | 4     | Assume a single column of text of variable sizes.                                             |
+| PSM_SINGLE_BLOCK_VERT_TEXT | 5     | Assume a single uniform block of vertically aligned text.                                     |
+| PSM_SINGLE_BLOCK           | 6     | Assume a single uniform block of text.                                                        |
+| PSM_SINGLE_LINE            | 7     | Treat the image as a single text line.                                                        |
+| PSM_SINGLE_WORD            | 8     | Treat the image as a single word.                                                             |
+| PSM_CIRCLE_WORD            | 9     | Treat the image as a single word in a circle.                                                 |
+| PSM_SINGLE_CHAR            | 10    | Treat the image as a single character.                                                        |
+| PSM_SPARSE_TEXT            | 11    | Sparse text. Find as much text as possible in no particular order.                            |
+| PSM_SPARSE_TEXT_OSD        | 12    | Sparse text with OSD.                                                                         |
+| PSM_RAW_LINE               | 13    | Raw line. Treat the image as a single text line, bypassing hacks that are Tesseract-specific. |
+
+**event**
+
+| Event type | Value    | Description                                          |
+| ---------- | -------- | ---------------------------------------------------- |
+| FINISHED   | finished | Event when OCR completes                             |
+| PROGRESS   | progress | Progress event when OCR is processing                |
+| ERROR      | error    | Error event OCR fails and some error is being thrown |
+
+**ocrEventResponse**
+
+| Key      | Type   | Description      |
+| -------- | ------ | ---------------- |
+| text     | string | Result text      |
+| progress | number | Progress percent |
+| message  | string | Error message    |
 
 ## Language Support
 
