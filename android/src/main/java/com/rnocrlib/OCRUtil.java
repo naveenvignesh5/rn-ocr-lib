@@ -104,7 +104,7 @@ public class OCRUtil {
             WritableMap params = Arguments.createMap();
 
             if (!initTessLangModel(lang, ocrEngineMode)) {
-                params.putString("message", "Unable to initialize tesseract");
+                params.putString("error", "Unable to initialize tesseract");
                 sendEvent(context, ERROR_EVENT, params);
                 return;
             }

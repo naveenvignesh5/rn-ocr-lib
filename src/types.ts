@@ -34,8 +34,8 @@ export enum OCREvent {
 
 interface OCREventResponse {
   text: string;
-  message: string;
   percent: number;
+  error: string;
 }
 
 export interface OCROptions {

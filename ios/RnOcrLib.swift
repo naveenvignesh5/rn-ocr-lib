@@ -61,7 +61,7 @@ class RnOcrLib: RCTEventEmitter {
 
   func recognizeTextHandler(request: VNRequest, error: Error?) -> Void {
     if error != nil {
-      self.sendEvent(withName: C_ERROR_EVENT, body: ["message": error])
+      self.sendEvent(withName: C_ERROR_EVENT, body: ["error": error])
       return
     }
 

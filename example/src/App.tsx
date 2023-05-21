@@ -49,8 +49,8 @@ export default function App() {
         ocrEngineMode: OcrEngineMode.ACCURATE,
         lang: ['tam', 'eng', 'fra'],
       });
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -72,7 +72,7 @@ export default function App() {
     }
 
     if (event === OCREvent.ERROR) {
-      setError(data.message);
+      setError(data.error);
     }
   });
 
