@@ -55,18 +55,15 @@ Call this hook to setup listener to listen to progress, result and error.
 ```typescript
 useOCREventListener(
   (event: OCREventType, ocrEventResponse: OCREventResponse) => {
-    if (event === OCREvent.FINISHED) {
-      // console.log(ocrEventResponse.text)
-      return;
-    }
-
-    if (event === OCREvent.PROGRESS) {
-      // console.log(ocrEventResponse.percent)
-      return;
-    }
-
-    if (event === OCREvent.ERROR) {
-      // console.log(ocrEventResponse.message)
+    switch (event) {
+      case OCREvent.FINISHED:
+        return;
+      case OCREvent.PROGRESS:
+        return;
+      case OCREvent.ERROR:
+        return;
+      default:
+        return;
     }
   }
 );
@@ -79,8 +76,9 @@ useOCREventListener(
 | Input type | Value  | Description        |
 | ---------- | ------ | ------------------ |
 | file       | FILE   | Path to image file |
-| base64     | BASE64 | Base 64 string     |
+| base64     | BASE64 | Base64 string      |
 
+\
 **options**
 
 | Option        | Type          | iOS | Android | Default      | Description                                         |
@@ -89,14 +87,16 @@ useOCREventListener(
 | pageSegMode   | PageSegMode   | No  | Yes     | PSM_OSD_ONLY | Page seg mode of tesseract                          |
 | lang          | string[]      | Yes | Yes     | ["eng"]      | Languages for which recognization is needed         |
 
+\
 **ocrEngineMode**
 
-| Engine Mode   | Value | Description                                                                                                                                            |
-| ------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| FAST          | 0     | Fast mode where recognization will be faster but mismatch of words is possible                                                                         |
-| ACCURATE      | 1     | Accurate mode where time to process is more but more accurate text will be obtained                                                                    |
-| FAST_ACCURATE | 2     | Relavant for android tesseract where train data is provided for accurate and fast results but traindata file may be biggers compared to previous modes |
+| Engine Mode   | Value | Description                                                                                                                                           |
+| ------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FAST          | 0     | Fast mode where recognization will be faster but mismatch of words is possible                                                                        |
+| ACCURATE      | 1     | Accurate mode where time to process is more but more accurate text will be obtained                                                                   |
+| FAST_ACCURATE | 2     | Relavant for android tesseract where train data is provided for accurate and fast results but traindata file may be bigger compared to previous modes |
 
+\
 **pageSegMode (Android)**
 
 By default Tesseract expects a page of text when it segments an image. If you’re just seeking to OCR a small region, try a different segmentation mode.
@@ -118,6 +118,7 @@ By default Tesseract expects a page of text when it segments an image. If you’
 | PSM_SPARSE_TEXT_OSD        | 12    | Sparse text with OSD.                                                                         |
 | PSM_RAW_LINE               | 13    | Raw line. Treat the image as a single text line, bypassing hacks that are Tesseract-specific. |
 
+\
 **event**
 
 | Event type | Value    | Description                                          |
@@ -126,6 +127,7 @@ By default Tesseract expects a page of text when it segments an image. If you’
 | PROGRESS   | progress | Progress event when OCR is processing                |
 | ERROR      | error    | Error event OCR fails and some error is being thrown |
 
+\
 **ocrEventResponse**
 
 | Key      | Type   | Description      |

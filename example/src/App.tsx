@@ -61,18 +61,18 @@ export default function App() {
   };
 
   useOCREventListener((event, data) => {
-    if (event === OCREvent.FINISHED) {
-      setText(data.text);
-      return;
-    }
-
-    if (event === OCREvent.PROGRESS) {
-      setProgress(data.percent);
-      return;
-    }
-
-    if (event === OCREvent.ERROR) {
-      setError(data.error);
+    switch (event) {
+      case OCREvent.FINISHED:
+        setText(data.text);
+        return;
+      case OCREvent.PROGRESS:
+        setProgress(data.percent);
+        return;
+      case OCREvent.ERROR:
+        setError(data.error);
+        return;
+      default:
+        return;
     }
   });
 
