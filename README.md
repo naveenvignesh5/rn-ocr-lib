@@ -6,6 +6,10 @@ React native library to perform OCR on images. This library uses Tesseract libra
 
 ![React Native](https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
 
+## Showcase
+
+<img alt="Demo" src="media/demo.gif" width="300">
+
 ## Installation
 
 ```sh
