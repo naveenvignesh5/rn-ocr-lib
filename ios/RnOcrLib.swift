@@ -56,7 +56,7 @@ class RnOcrLib: RCTEventEmitter {
       return
     }
 
-    self.sendEvent(withName: C_PROGRESS_EVENT, body: ["percent": progress * 100])
+    self.sendEvent(withName: C_PROGRESS_EVENT, body: ["percent": round(progress * 100)])
   }
 
   func recognizeTextHandler(request: VNRequest, error: Error?) -> Void {

@@ -115,7 +115,9 @@ const styles = StyleSheet.create({
   },
   textContent: {
     margin: 12,
-    fontSize: 12,
+    fontSize: 16,
+    flex: 1,
+    justifyContent: 'center',
   },
   errorText: {
     color: 'red',
