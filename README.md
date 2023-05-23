@@ -138,7 +138,7 @@ By default Tesseract expects a page of text when it segments an image. If you’
 | -------- | ------ | ---------------- |
 | text     | string | Result text      |
 | progress | number | Progress percent |
-| message  | string | Error message    |
+| error    | string | Error message    |
 
 ## Language Support
 
